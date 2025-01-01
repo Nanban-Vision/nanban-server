@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import shutil
 import uuid
+from pathlib import Path
 from gtts import gTTS
 from voice_assistant import *
 from object_detection import * 
