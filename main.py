@@ -7,7 +7,6 @@ from pathlib import Path
 from gtts import gTTS
 from voice_assistant import *
 from object_detection import * 
-from dns_updater import *
 
 app = FastAPI()
 
