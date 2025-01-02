@@ -7,12 +7,13 @@ from pathlib import Path
 from gtts import gTTS
 from voice_assistant import *
 from object_detection import * 
+from dns_updater import *
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["https://nanban.duckdns.org"],
     allow_methods=["*"],  
     allow_headers=["*"],  
 )
