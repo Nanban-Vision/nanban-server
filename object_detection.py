@@ -8,7 +8,6 @@ import cv2
 from PIL import Image
 import numpy as np
 
-image_filename = "captured_image.jpg"
 model = YOLO('models/yolov8m-seg.pt')
 pipe = pipeline(task="depth-estimation", model="depth-anything/Depth-Anything-V2-Small-hf")
 
@@ -34,11 +33,8 @@ def check_location(x_min, y_min, x_max, y_max, frame_width, frame_height):
     else:
         return "front"
 
-def scan_mode():
+def detect_objects(image_filename):
     try:
-        cap = cv2.VideoCapture(1)
-        ret, frame = cap.read()
-        cv2.imwrite(image_filename, frame)
         frame = cv2.imread(image_filename)
 
         if frame is None:
@@ -60,11 +56,8 @@ def scan_mode():
                 depth_array = np.array(depth_map)  
                 mean_depth = np.median(depth_array)
                 message = f"There is a {name}, around {mean_depth:.2f} centimeters away and it is in your {position}."
-                speak(message)
+                return message
     except Exception as e:
         print(f"Error: {e}")
         import traceback
         traceback.print_exc()
-    finally:
-        cap.release()
-        cv2.destroyAllWindows()
