@@ -61,3 +61,5 @@ def detect_objects(image_filename):
         print(f"Error: {e}")
         import traceback
         traceback.print_exc()
+
+    return "no_object"
