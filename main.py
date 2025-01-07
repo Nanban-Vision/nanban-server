@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import shutil
 import uuid
 from pathlib import Path
@@ -34,6 +34,7 @@ async def object_detection(file: UploadFile = File(...)):
 
     if detected_description == "no_object": 
         return JSONResponse(
+            content={"detail": "No objects detected in the image."},
             status_code=422
         )
     else:
@@ -48,7 +49,7 @@ async def voice_assistant(query: str):
     response_audio_path = TEMP_DIR / f"{uuid.uuid4()}.mp3"
     text_to_speech(assistant_response, response_audio_path)
 
-    return FileResponse(response_audio_path, media_type="audio/mpeg", filename=unique_filename)
+    return FileResponse(response_audio_path, media_type="audio/mpeg", filename=response_audio_path.name)
 
 @app.get("/")
 async def root():
