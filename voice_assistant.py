@@ -5,6 +5,7 @@ import os
 from huggingface_hub import login
 from langchain.llms import HuggingFaceHub
 from dotenv import load_dotenv
+import requests
 
 load_dotenv()
 IPDATA_API_KEY = os.getenv("IPDATA_API_KEY")

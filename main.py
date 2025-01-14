@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
+from pydantic import BaseModel
 import shutil
 import uuid
 from pathlib import Path
@@ -12,7 +13,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://nanban.duckdns.org"],
+    allow_origins=["*"],
     allow_methods=["*"],  
     allow_headers=["*"],  
 )
@@ -43,9 +44,13 @@ async def object_detection(file: UploadFile = File(...)):
         
         return FileResponse(speech_file_path, media_type="audio/mpeg", filename=speech_file_path.name)
 
+class VoiceAssistantRequest(BaseModel):
+    query: str
+
 @app.post("/voice-assistant/")
-async def voice_assistant(query: str):
-    assistant_response = voice_mode(query) 
+async def voice_assistant(request: VoiceAssistantRequest):  
+    print(f"Received query: {request.query}")
+    assistant_response = voice_mode(request.query)  
     response_audio_path = TEMP_DIR / f"{uuid.uuid4()}.mp3"
     text_to_speech(assistant_response, response_audio_path)
 
