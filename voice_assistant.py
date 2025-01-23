@@ -6,6 +6,10 @@ from huggingface_hub import login
 from langchain.llms import HuggingFaceHub
 from dotenv import load_dotenv
 import requests
+import uuid
+from pytube import YouTube
+from youtube_search import YoutubeSearch
+from pydub import AudioSegment
 
 load_dotenv()
 IPDATA_API_KEY = os.getenv("IPDATA_API_KEY")
@@ -76,8 +80,34 @@ def get_response(input_text):
     clean_response = remove_unwanted_characters(response)
     return clean_response
 
+def search_song(query):
+    results = YoutubeSearch(query, max_results=1).to_dict()
+    if results:
+        video_id = results[0]['id']
+        url = f"https://www.youtube.com/watch?v={video_id}"
+        speak("Downloading song from youtube...")
+        download_audio(url)
+    else:
+        speak("song not found")
+
+def download_audio(url):
+    filename = f"temp/{uuid.uuid4()}.mp3"
+
+    yt = YouTube(url)
+    audio_stream = yt.streams.filter(only_audio=True).first()
+    
+    downloaded_file = audio_stream.download(output_path="temp")
+    
+    if not filename.endswith('.mp3'):
+        AudioSegment.from_file(downloaded_file).export(filename, format="mp3")
+        os.remove(downloaded_file)  
+    
+    return filename
+
 def voice_mode(query):
     if query == 'error':
         return "I'm sorry, I didn't understand that."
+    elif query.lower().startswith('play song'):
+        return search_song(query.split(' ', 2)[-1])
     else:
         return get_response(query)

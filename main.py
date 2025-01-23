@@ -50,10 +50,14 @@ class VoiceAssistantRequest(BaseModel):
 @app.post("/voice-assistant/")
 async def voice_assistant(request: VoiceAssistantRequest):  
     print(f"Received query: {request.query}")
-    assistant_response = voice_mode(request.query)  
-    response_audio_path = TEMP_DIR / f"{uuid.uuid4()}.mp3"
-    text_to_speech(assistant_response, response_audio_path)
+    response_audio_path = None
 
+    assistant_response = voice_mode(request.query)  
+    if not response.query.lower().startswith('play song'):
+        response_audio_path = TEMP_DIR / f"{uuid.uuid4()}.mp3"
+        text_to_speech(assistant_response, response_audio_path)
+    else: 
+        response_audio_path = assistant_response
     return FileResponse(response_audio_path, media_type="audio/mpeg", filename=response_audio_path.name)
 
 @app.get("/")
