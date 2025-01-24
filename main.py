@@ -53,12 +53,16 @@ async def voice_assistant(request: VoiceAssistantRequest):
     response_audio_path = None
 
     assistant_response = voice_mode(request.query)  
-    if not response.query.lower().startswith('play song'):
+    if not request.query.lower().startswith('play song'):
         response_audio_path = TEMP_DIR / f"{uuid.uuid4()}.mp3"
         text_to_speech(assistant_response, response_audio_path)
     else: 
         response_audio_path = assistant_response
-    return FileResponse(response_audio_path, media_type="audio/mpeg", filename=response_audio_path.name)
+        if response_audio_path == "download_failed":
+            response_audio_path = TEMP_DIR / f"{uuid.uuid4()}.mp3"
+            text_to_speech("Couldnt download song", response_audio_path)
+            
+    return FileResponse(str(response_audio_path), media_type="audio/mpeg", filename=os.path.basename(response_audio_path))
 
 @app.get("/")
 async def root():

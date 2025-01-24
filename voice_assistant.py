@@ -7,7 +7,7 @@ from langchain.llms import HuggingFaceHub
 from dotenv import load_dotenv
 import requests
 import uuid
-from pytube import YouTube
+import yt_dlp
 from youtube_search import YoutubeSearch
 from pydub import AudioSegment
 
@@ -83,26 +83,32 @@ def get_response(input_text):
 def search_song(query):
     results = YoutubeSearch(query, max_results=1).to_dict()
     if results:
-        video_id = results[0]['id']
-        url = f"https://www.youtube.com/watch?v={video_id}"
-        speak("Downloading song from youtube...")
-        download_audio(url)
+        url = f"https://www.youtube.com/watch?v={results[0]['id']}"
+        filename = download_audio(url)
+        return filename
     else:
-        speak("song not found")
+        return "song_not_found"
 
 def download_audio(url):
-    filename = f"temp/{uuid.uuid4()}.mp3"
-
-    yt = YouTube(url)
-    audio_stream = yt.streams.filter(only_audio=True).first()
+    mp3_filename = f"temp/{uuid.uuid4()}"
     
-    downloaded_file = audio_stream.download(output_path="temp")
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'outtmpl': mp3_filename,
+    }
     
-    if not filename.endswith('.mp3'):
-        AudioSegment.from_file(downloaded_file).export(filename, format="mp3")
-        os.remove(downloaded_file)  
-    
-    return filename
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        return mp3_filename + ".mp3"
+    except Exception as e:
+        print(f"Audio download error: {e}")
+        return "download_failed"
 
 def voice_mode(query):
     if query == 'error':
@@ -110,4 +116,4 @@ def voice_mode(query):
     elif query.lower().startswith('play song'):
         return search_song(query.split(' ', 2)[-1])
     else:
-        return get_response(query)
+       return get_response(query)
