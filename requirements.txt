@@ -9,7 +9,6 @@ fastapi
 uvicorn
 gtts
 transformers
-pytube
 youtube-search
 pydub
 yt_dlp
